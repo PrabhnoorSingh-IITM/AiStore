@@ -1,0 +1,87 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+}
+
+// ------------------------------------------------------
+// ENUMS
+// ------------------------------------------------------
+
+enum PricingModel {
+  Free
+  Freemium
+  Paid
+  Usage_Based @map("Usage-Based")
+}
+
+// ------------------------------------------------------
+// MODELS
+// ------------------------------------------------------
+
+model Category {
+  id          String         @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  name        String         @unique @db.VarChar(255)
+  slug        String         @unique @db.VarChar(255)
+  description String?        @db.Text
+  tools       ToolCategory[]
+
+  @@map("categories")
+}
+
+model Tool {
+  id                  String         @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  name                String         @db.VarChar(255)
+  slug                String         @unique @db.VarChar(255)
+  description         String?        @db.Text
+  website_url         String?        @db.VarChar(512)
+  pricing_model       PricingModel   @default(Free)
+  
+  // Scoring Criteria (Precision up to 1 decimal place mapped to numeric)
+  capability_score      Decimal?       @db.Decimal(3, 1)
+  speed_score           Decimal?       @db.Decimal(3, 1)
+  cost_efficiency_score Decimal?       @db.Decimal(3, 1)
+  usefulness_score      Decimal?       @db.Decimal(3, 1)
+  overall_score         Decimal?       @db.Decimal(3, 1)
+
+  created_at          DateTime       @default(now()) @db.Timestamptz(6)
+
+  // Relations
+  categories          ToolCategory[]
+  tutorials           Tutorial[]
+
+  @@map("tools")
+}
+
+// Join table mapping Tools to Categories
+model ToolCategory {
+  tool_id     String   @db.Uuid
+  category_id String   @db.Uuid
+
+  tool        Tool     @relation(fields: [tool_id], references: [id], onDelete: Cascade)
+  category    Category @relation(fields: [category_id], references: [id], onDelete: Cascade)
+
+  @@id([tool_id, category_id])
+  @@map("tool_categories")
+}
+
+model Tutorial {
+  id                      String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tool_id                 String   @db.Uuid
+  title                   String   @db.VarChar(255)
+  content                 String?  @db.Text
+  prompt_strategies       String?  @db.Text
+  token_optimization_tips String?  @db.Text
+  created_at              DateTime @default(now()) @db.Timestamptz(6)
+  updated_at              DateTime @default(now()) @db.Timestamptz(6) @updatedAt
+
+  tool                    Tool     @relation(fields: [tool_id], references: [id], onDelete: Cascade)
+
+  @@map("tutorials")
+}
