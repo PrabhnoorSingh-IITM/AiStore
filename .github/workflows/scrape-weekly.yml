@@ -1,0 +1,56 @@
+name: Weekly AI Tool Scraper
+
+on:
+  schedule:
+    # Runs every Sunday at 03:00 UTC
+    - cron: '0 3 * * 0'
+  workflow_dispatch:
+    # Allow manual trigger from the GitHub Actions UI for testing
+    inputs:
+      max_pages:
+        description: 'Max pages to scrape (default: 5)'
+        required: false
+        default: '5'
+
+jobs:
+  scrape:
+    name: Scrape & Ingest New AI Tools
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Install Playwright Chromium browser
+        run: npx playwright install chromium --with-deps
+
+      - name: Run scraper
+        env:
+          # ── Required ──────────────────────────────────────────
+          # Admin JWT: Service-Role key from your Supabase project settings
+          ADMIN_API_KEY: ${{ secrets.ADMIN_API_KEY }}
+          # Your deployed Next.js app URL (no trailing slash)
+          ADMIN_API_URL: ${{ secrets.ADMIN_API_URL }}
+          # ── Optional overrides ────────────────────────────────
+          SCRAPE_TARGET_URL: 'https://www.futurepedia.io/ai-tools'
+          SCRAPE_MAX_PAGES: ${{ github.event.inputs.max_pages || '5' }}
+          NODE_ENV: production
+        run: npx tsx scripts/scrape-tools.ts
+
+      - name: Upload scraper log on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: scraper-failure-log
+          path: /tmp/*.log
+          retention-days: 7
