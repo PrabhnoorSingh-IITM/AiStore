@@ -85,7 +85,8 @@ async function main() {
     const chunk = rows.slice(i, i + BATCH_SIZE);
     console.log(`🔄 Batch ${Math.floor(i/BATCH_SIZE) + 1}...`);
 
-    for (const row of chunk) {
+    for (const rowObj of chunk) {
+      const row = rowObj as any;
       const name = row.Title?.trim();
       const description = row.Description?.trim();
       if (!name) continue;

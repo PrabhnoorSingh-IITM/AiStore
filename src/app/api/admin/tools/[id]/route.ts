@@ -6,14 +6,14 @@ import { z } from 'zod';
 
 export async function PUT(
   req: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     // 1. JWT Authentication Guard
     const adminCheck = await verifyAdmin(req);
     if (adminCheck instanceof NextResponse) return adminCheck;
 
-    const toolId = params.id;
+    const { id: toolId } = await params;
     if (!toolId) {
        return NextResponse.json({ error: 'Target Tool ID parameter is required.' }, { status: 400 });
     }
@@ -63,21 +63,21 @@ export async function PUT(
        return NextResponse.json({ error: 'The requested tool record does not exist.' }, { status: 404 });
     }
 
-    console.error(`[PUT /api/admin/tools/${params.id}] Internal Execution Error:`, error.message);
+    console.error(`[PUT /api/admin/tools] Internal Execution Error:`, error.message);
     return NextResponse.json({ error: 'Internal Server Error during mutation.' }, { status: 500 });
   }
 }
 
 export async function DELETE(
   req: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     // Authority
     const adminCheck = await verifyAdmin(req);
     if (adminCheck instanceof NextResponse) return adminCheck;
 
-    const toolId = params.id;
+    const { id: toolId } = await params;
     if (!toolId) {
        return NextResponse.json({ error: 'Target Tool ID parameter is required.' }, { status: 400 });
     }
@@ -93,7 +93,7 @@ export async function DELETE(
     if (error.code === 'P2025') {
        return NextResponse.json({ error: 'Target resource does not exist.' }, { status: 404 });
     }
-    console.error(`[DELETE /api/admin/tools/${params.id}] Internal Execution Error:`, error);
+    console.error(`[DELETE /api/admin/tools] Internal Execution Error:`, error);
     return NextResponse.json({ error: 'Internal Server Error executing purge.' }, { status: 500 });
   }
 }

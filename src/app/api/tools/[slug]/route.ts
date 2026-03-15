@@ -3,10 +3,10 @@ import { prisma } from '@/src/lib/prisma';
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { slug: string } }
+  { params }: { params: Promise<{ slug: string }> }
 ) {
   try {
-    const slug = params.slug;
+    const { slug } = await params;
 
     if (!slug) {
       return NextResponse.json(
@@ -45,7 +45,7 @@ export async function GET(
     return NextResponse.json({ data: formattedTool });
 
   } catch (error: any) {
-    console.error(`[GET /api/tools/${params.slug}] Fetch Error:`, error.message);
+    console.error(`[GET /api/tools] Fetch Error:`, error.message);
     return NextResponse.json(
       { error: 'Internal Server Error fetching specific tool.' },
       { status: 500 }

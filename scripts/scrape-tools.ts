@@ -115,7 +115,7 @@ async function scrapePage(page: Page, url: string): Promise<ScrapedTool[]> {
     '[data-testid*="tool"]',
   ];
 
-  let cards = $([]);
+  let cards: any = $([]);
   for (const sel of cardSelectors) {
     const found = $(sel);
     if (found.length > 0) {
@@ -130,7 +130,7 @@ async function scrapePage(page: Page, url: string): Promise<ScrapedTool[]> {
     return [];
   }
 
-  cards.each((i, el) => {
+  cards.each((i: number, el: any) => {
     const card = $(el);
     
     // DEBUG: Log first card's HTML to help fix selectors

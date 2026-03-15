@@ -30,8 +30,9 @@ async function getTool(slug: string): Promise<Tool | null> {
   return json.data;
 }
 
-export default async function ToolDetailPage({ params }: { params: { slug: string } }) {
-  const tool = await getTool(params.slug);
+export default async function ToolDetailPage({ params }: { params: Promise<{ slug: string }> }) {
+  const { slug } = await params;
+  const tool = await getTool(slug);
 
   if (!tool) notFound();
 
