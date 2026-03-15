@@ -33,6 +33,7 @@ export async function POST(req: NextRequest) {
         speed_score: p.speed_score,
         cost_efficiency_score: p.cost_efficiency_score,
         usefulness_score: p.usefulness_score,
+        overall_score: p.overall_score,
         categories: {
           create: categoryConnect, // Relational Insertion mapped via Join Table schema
         },

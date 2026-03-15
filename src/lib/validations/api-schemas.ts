@@ -17,6 +17,7 @@ export const createToolSchema = z.object({
   speed_score: z.number().min(0).max(10).optional(),
   cost_efficiency_score: z.number().min(0).max(10).optional(),
   usefulness_score: z.number().min(0).max(10).optional(),
+  overall_score: z.number().min(0).max(10).optional(),
   category_ids: z.array(z.string().uuid('Invalid category ID format')).optional(),
 });
 
