@@ -55,6 +55,7 @@ model Tool {
   // Relations
   categories          ToolCategory[]
   tutorials           Tutorial[]
+  bookmarks           Bookmark[]
 
   @@map("tools")
 }
@@ -84,4 +85,18 @@ model Tutorial {
   tool                    Tool     @relation(fields: [tool_id], references: [id], onDelete: Cascade)
 
   @@map("tutorials")
+}
+
+model Bookmark {
+  id         String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  user_id    String   @db.Uuid // Maps to auth.users in Supabase
+  tool_id    String   @db.Uuid
+  created_at DateTime @default(now()) @db.Timestamptz(6)
+
+  tool       Tool     @relation(fields: [tool_id], references: [id], onDelete: Cascade)
+
+  @@unique([user_id, tool_id]) // Prevents duplicate bookmarks
+  @@index([user_id])           // Optimizes fetching a user's saved tools
+  @@index([tool_id])           // Optimizes counting how many times a tool is saved
+  @@map("bookmarks")
 }

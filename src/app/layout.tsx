@@ -6,10 +6,15 @@ export const metadata: Metadata = {
   description: 'The world\'s most curated directory of AI tools. Filter by capability, explore deep-dive tutorials, and optimize your API costs.',
 };
 
+import GlobalAuthWrapper from '@/src/components/GlobalAuthWrapper';
+
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en">
-      <body>{children}</body>
+      <body>
+        <GlobalAuthWrapper />
+        {children}
+      </body>
     </html>
   );
 }
